@@ -4,6 +4,17 @@
 {% block content %}
 
 {% set num_catagories = ratings | length %}
+<div class="center row possibly-ready-header">
+  <p class="text-left">
+    {% if possibly_ready[0] == True %}
+    You answered all the questions easily. You're ready to take the exam.
+    {% elif possibly_ready[1] %}
+    Your total difficulty score is <strong>{{possibly_ready[1]}}</strong>. We advise that you hold off taking the exam until your total difficulty score is less than <strong>{{diff_threshold}}</strong>.
+    {% else %}
+    You have seen only {{possibly_ready[2]}} of the {{possibly_ready[3]}} questions on the exam. Keep working at it :)
+    {% endif %}
+  </p>
+</div>
 <div class="center row">
   <ul class="tabs" data-tab role="tablist">
         {% for count in range(0, num_catagories) %}
@@ -28,7 +39,6 @@
           {% else %}
             <section role="tabpanel" aria-hidden="true" class="content stats-panel" id="{{rating_name}}">
           {% endif %}
-          <p>
           <div class="row">
             <div class="large-12 columns">
               <div class="interior-panel">
@@ -53,7 +63,6 @@
               </div>
             </div>
            </div>
-          </p>
         </section>
         {% endfor %}
         {% endfor %}

@@ -97,3 +97,11 @@ label.choice-label {
     white-space:normal;
     padding-left: 10px;
 }
+
+.possibly-ready-header{
+  height: auto !important;
+}
+
+.possibly-ready-header > p{
+  margin-bottom: 0px;
+}

@@ -9,6 +9,8 @@ from random import shuffle
 askiiBaseUrl = "http://askii.media.mit.edu/askii/api/v1.0"
 key = "qb4SpwwMbvDut4DK5SGT3GU5eYGQAzAa0FC0Wu56Mo0"
 headers = {"Content-Type": "application/json"}
+diff_threshold = 30
+num_questions_in_session = 30.0
 
 app = Flask(__name__)
 app.secret_key = 'bacon'
@@ -22,11 +24,22 @@ def login_required(f):
     return decorated_function
 
 def progress():
-    if session["count"]>100:
-        return 100
+    if session["count"]>num_questions_in_session:
+        return redirect(url_for('stats'))
     else:
-        return session["count"]
+        return session["count"]/num_questions_in_session*100
 
+def ready_to_take_exam(user_id):
+    user = requests.get(askiiBaseUrl+"/users/"+user_id+"?key="+key, headers=headers).json()["user"]
+    num_all_questions = len(requests.get(askiiBaseUrl+"/questions?key="+key, headers=headers).json()["questions"])
+    totaldiff = 0
+    for question in user["questions"]:
+        totaldiff += int(user["questions"][question]["difficulty"])
+    if len(user["questions"]) >= num_all_questions:
+        if totaldiff < diff_threshold:
+            return (True, totaldiff)
+        return (False, totaldiff)
+    return (False, None, len(user["questions"]), num_all_questions)
 
 @app.route('/')
 @login_required
@@ -75,6 +88,7 @@ def logout():
     return redirect(url_for('login', next=request.url))
 
 @app.route('/question/<count>', methods=['GET'])
+@login_required
 def get_question(count):
     count = int(count)
     session_count = session.get("count", 0)
@@ -97,6 +111,7 @@ def get_question(count):
     return render_template('question.html', question=question, choices=random_choices, count=count, progress=progress_int, user=session["user"])
 
 @app.route('/answer', methods=['POST'])
+@login_required
 def answer_question():
     num_answer = request.form.get("answer", "0")
     question_id = request.form.get("question_id", "")
@@ -108,6 +123,7 @@ def answer_question():
     return jsonify({"next_url" : next_url})
 
 @app.route('/stats', methods=['GET'])
+@login_required
 def get_stats():
     user_id = session["user"]["_id"]
     user = requests.get(askiiBaseUrl+"/users/"+user_id+"?key="+key, headers=headers)
@@ -127,9 +143,11 @@ def get_stats():
         elif question_val["difficulty"] <= 7:
             very_hard_questions[question_key] = requests.get(askiiBaseUrl+"/questions/"+question_key+"?key="+key, headers=headers).json()["question"]
     all_ratings = [{"easy": easy_questions}, {"medium": medium_questions}, {"hard": hard_questions}, {"very hard": very_hard_questions}]
-    return render_template('stats.html', user=user, ratings=all_ratings)
+    possibly_ready = ready_to_take_exam(user_id)
+    return render_template('stats.html', user=user, ratings=all_ratings, possibly_ready=possibly_ready, diff_threshold=diff_threshold)
 
 @app.route('/review/<question_id>', methods=['GET'])
+@login_required
 def review_question(question_id):
     question = requests.get(askiiBaseUrl+"/questions/"+question_id+"?key="+key, headers=headers).json()
     return render_template('review.html', user=session["user"], question=question["question"])
