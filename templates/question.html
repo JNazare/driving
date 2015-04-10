@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}Learn{% endblock %}
+{% block content %}
+
+<div class="center row">
+    <div class="tabs-content">
+        <section role="tabpanel" aria-hidden="true" class="content active" id="dashboardPanel">
+          <p>
+          <div class="row">
+            <div class="large-12 columns">
+              <div class="interior-panel">
+                <p class="formattedParagraph text-left">
+                  {{ question.question }}
+                </p>
+                <form>
+                  {% set counter = 0 %}
+                  {% for choice in choices %}
+                    <div class="small-12 columns">
+                      <input class="choice-input" type="radio" class="choice-input" name="choice" value="{{choice[1]}}" id="choice{{counter}}">
+                      <label for="choice{{counter}}">{{choice[0]}}</label>
+                    </div>
+                  {% set counter = counter + 1 %}
+                  {% endfor %}
+                </form>
+              </div>
+            </div>
+           </div>
+          </p>
+        </section>
+    </div>
+</div>
+<input id="question_uri" type="hidden" value="{{question.uri}}">
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$( ".choice-input" ).change(function() {
+  var val = $(this).val().toString();
+  var question_id = $("#question_uri").val().split("/")
+  question_id = question_id[question_id.length - 1]
+  console.log(question_id)
+  $.post( "/answer", {answer: val, question_id: question_id}, function(data){
+    window.location.href = data.next_url;
+  })
+});
+</script>
+{% endblock %}

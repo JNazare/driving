@@ -4,6 +4,7 @@ from passlib.hash import sha256_crypt
 from functools import wraps
 import os
 import json
+from random import shuffle
 
 askiiBaseUrl = "http://localhost:5000/askii/api/v1.0"
 key = "qb4SpwwMbvDut4DK5SGT3GU5eYGQAzAa0FC0Wu56Mo0"
@@ -42,8 +43,7 @@ def do_login():
         abort(404)
     if sha256_crypt.verify(password, hashed_password) == False:
         abort(404)
-    if askiiUser.get("_id", None):
-        askiiUser["_id"]=unicode(askiiUser["_id"])
+    askiiUser["_id"]=askiiUser["uri"].split("/")[-1]
     session["user"]=askiiUser
     return redirect(url_for('index', next=request.url))
 
@@ -56,8 +56,41 @@ def do_signup():
     askiiUser = requests.post(askiiBaseUrl+"/users?key="+key, headers=headers, data=data)
     if askiiUser == None:
         abort(404)
+    askiiUser["_id"]=askiiUser["uri"].split("/")[-1]
     session["user"]=askiiUser.json()["user"]
     return redirect(url_for('index', next=request.url))
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.clear()
+    return redirect(url_for('login', next=request.url))
+
+@app.route('/question/<count>', methods=['GET'])
+def get_question(count):
+    session["count"]=int(count)
+    data = json.dumps({"count": str(count)})
+    # print session["user"]
+    question = requests.post(askiiBaseUrl+"/next/"+session["user"]["_id"]+"?key="+key, headers=headers, data=data)
+    question = question.json()
+    random_choices = []
+    for possibility in question["possiblities"]:
+        random_choices.append((possibility, 0))
+    random_choices.append((question["answer"],1))
+    shuffle(random_choices)
+
+    return render_template('question.html', question=question, choices=random_choices, count=count)
+
+@app.route('/answer', methods=['POST'])
+def answer_question():
+    num_answer = request.form.get("answer", "0")
+    question_id = request.form.get("question_id", "")
+    user_id = session["user"]["_id"]
+    data = json.dumps({"answer": num_answer})
+    answer = requests.post(askiiBaseUrl+"/users/"+user_id+"/"+question_id+"?key="+key, headers=headers, data=data)
+    count_str = str(session["count"]+1)
+    next_url = url_for('get_question', count=count_str, _external=True)
+    return jsonify({"next_url" : next_url})
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 4000))

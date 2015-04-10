@@ -4,18 +4,20 @@
 {% block content %}
 
 <div class="center row">
-    <ul class="tabs" data-tab role="tablist">
-        <li class="tab-title title active" role="presentational" >
-            <a href="#dashboardPanel" role="tab" tabindex="0"aria-selected="false" controls="panel2-2">
-                Dashboard
-            </a>
-        </li>
-    </ul>
     <div class="tabs-content">
         <section role="tabpanel" aria-hidden="true" class="content active" id="dashboardPanel">
           <p>
           <div class="row">
             <div class="large-12 columns">
+              <div class="interior-panel">
+                <p class="formattedParagraph text-center">
+                  <strong> Welcome! </strong> 
+                  <br> 
+                  Practice for the Massachusetts Liscense Exam with Askii.
+                  <br>
+                  <a class="button center-button" href="/question/0">Start</a>
+                </p>
+              </div>
             </div>
            </div>
           </p>
@@ -28,3 +30,4 @@
 
 {% block scripts %}
 {% endblock %}
+
