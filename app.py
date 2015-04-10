@@ -21,6 +21,13 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def progress():
+    if session["count"]>100:
+        return 100
+    else:
+        return session["count"]
+
+
 @app.route('/')
 @login_required
 def index():
@@ -77,8 +84,8 @@ def get_question(count):
         random_choices.append((possibility, 0))
     random_choices.append((question["answer"],1))
     shuffle(random_choices)
-
-    return render_template('question.html', question=question, choices=random_choices, count=count)
+    progress_int = progress()
+    return render_template('question.html', question=question, choices=random_choices, count=count, progress=progress_int)
 
 @app.route('/answer', methods=['POST'])
 def answer_question():

@@ -4,6 +4,13 @@
 {% block content %}
 
 <div class="center row">
+    <div class="row">
+      <div class="large-12 columns">
+          <div class="progress [radius round]">
+            <span class="meter" style="width:0%;"></span>
+          </div>
+      </div>
+    </div>
     <div class="tabs-content">
         <section role="tabpanel" aria-hidden="true" class="content active" id="dashboardPanel">
           <p>
@@ -17,8 +24,10 @@
                   {% set counter = 0 %}
                   {% for choice in choices %}
                     <div class="small-12 columns">
-                      <input class="choice-input" type="radio" class="choice-input" name="choice" value="{{choice[1]}}" id="choice{{counter}}">
-                      <label for="choice{{counter}}">{{choice[0]}}</label>
+                      <label class="choice-label" for="choice{{counter}}">
+                        <input class="choice-input" type="radio" class="choice-input" name="choice" value="{{choice[1]}}" id="choice{{counter}}">
+                        <span class="wrappable"> {{choice[0]}} </span>
+                      </label>
                     </div>
                   {% set counter = counter + 1 %}
                   {% endfor %}
@@ -26,24 +35,55 @@
               </div>
             </div>
            </div>
+           <div class="row">
+            <div class="large-12 columns">
+              <div class="explanation hide">
+                  <p class="explanation-text">REVIEW: {{question.explanation}}</p>
+                  <center>
+                  <button id="js-next-button" class="button explanation-button">Next</button>
+                  </center>
+                </div>
+            </div>
+           </div>
           </p>
         </section>
     </div>
 </div>
 <input id="question_uri" type="hidden" value="{{question.uri}}">
+<input id="progress" type="hidden" value="{{progress}}">
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-$( ".choice-input" ).change(function() {
-  var val = $(this).val().toString();
+
+$(".meter").css("width", $("#progress").val().toString()+"%")
+
+function postAnswer(val){
   var question_id = $("#question_uri").val().split("/")
   question_id = question_id[question_id.length - 1]
-  console.log(question_id)
   $.post( "/answer", {answer: val, question_id: question_id}, function(data){
     window.location.href = data.next_url;
-  })
+  });
+}
+
+$( ".choice-input" ).change(function() {
+  var val = $(this).val().toString();
+  $(".choice-input").attr('disabled',true)
+  if($(this).val()==1){
+    $(this).parent().addClass("correct");
+    postAnswer(val);
+  }
+  else{
+    $(this).parent().addClass("incorrect");
+    $(":radio[value=1]").parent().addClass("correct");
+    $('.explanation').show();
+  }
 });
+
+$( "#js-next-button" ).click(function(){
+  var val = $(this).val().toString();
+  postAnswer(val);
+})
 </script>
 {% endblock %}

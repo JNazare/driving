@@ -67,3 +67,33 @@ li.tab-title{
 .choice-input{
   height: auto !important;
 }
+
+.correct{
+  background-color: #99D6AD;
+}
+
+.incorrect{
+  background-color: #FF8080;
+}
+
+.explanation{
+  padding: 20px;
+}
+
+.explanation-text{
+  color: #555;
+  font-size: 12px;
+}
+
+label.choice-label {
+    white-space:nowrap;
+    padding: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    line-height: 0.4;
+}
+
+.wrappable {
+    white-space:normal;
+    padding-left: 10px;
+}
