@@ -2,13 +2,10 @@
   <section class="top-bar-section">
     <!-- Right Nav Section -->
     <ul class="right">
-      <li class="has-dropdown">
-        <a href="#">Settings</a>
-        <ul class="dropdown">
-          {% if user %}
-          <li><a href="/logout">Logout</a></li>
-          {% endif %}
-        </ul>
+      <li>
+        {% if user %}
+        <a href="/logout">Logout</a>
+        {% endif %}
       </li>
     </ul>
   </section>

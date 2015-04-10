@@ -85,7 +85,7 @@ def get_question(count):
     random_choices.append((question["answer"],1))
     shuffle(random_choices)
     progress_int = progress()
-    return render_template('question.html', question=question, choices=random_choices, count=count, progress=progress_int)
+    return render_template('question.html', question=question, choices=random_choices, count=count, progress=progress_int, user=session["user"])
 
 @app.route('/answer', methods=['POST'])
 def answer_question():

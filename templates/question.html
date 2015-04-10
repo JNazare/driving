@@ -59,20 +59,22 @@
 
 $(".meter").css("width", $("#progress").val().toString()+"%")
 
-function postAnswer(val){
+function postAnswer(num_val){
+  console.log(num_val)
   var question_id = $("#question_uri").val().split("/")
   question_id = question_id[question_id.length - 1]
-  $.post( "/answer", {answer: val, question_id: question_id}, function(data){
+  input = {answer: num_val, question_id: question_id}
+  $.post( "/answer", input, function(data){
     window.location.href = data.next_url;
   });
 }
 
 $( ".choice-input" ).change(function() {
-  var val = $(this).val().toString();
+  var num_val = $(this).val().toString();
   $(".choice-input").attr('disabled',true)
   if($(this).val()==1){
     $(this).parent().addClass("correct");
-    postAnswer(val);
+    postAnswer(num_val);
   }
   else{
     $(this).parent().addClass("incorrect");
@@ -82,8 +84,8 @@ $( ".choice-input" ).change(function() {
 });
 
 $( "#js-next-button" ).click(function(){
-  var val = $(this).val().toString();
-  postAnswer(val);
+  var num_val = $("input[name=choice]:checked").val().toString();
+  postAnswer(num_val);
 })
 </script>
 {% endblock %}
