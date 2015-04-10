@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}Learn{% endblock %}
+{% block content %}
+
+{% set num_catagories = ratings | length %}
+<div class="center row">
+  <ul class="tabs" data-tab role="tablist">
+        {% for count in range(0, num_catagories) %}
+        {% for rating_name, rating_val in ratings[count].iteritems() %}
+          {% if count == 0 %}
+            <li class="tab-title title active" role="presentational" >
+          {% else %}
+            <li class="tab-title title" role="presentational" >
+          {% endif %}
+          <a href="#{{rating_name}}" role="tab" tabindex="0"aria-selected="false" controls="panel2-2">
+              {% filter capitalize %}{{rating_name}}{% endfilter %}
+          </a>
+        </li>
+        {% endfor %}
+        {% endfor %}
+    </ul>
+    <div class="tabs-content">
+        {% for count in range(0, num_catagories ) %}
+        {% for rating_name, rating_val in ratings[count].iteritems() %}
+          {% if count == 0 %}
+            <section role="tabpanel" aria-hidden="true" class="content stats-panel active" id="{{rating_name}}">
+          {% else %}
+            <section role="tabpanel" aria-hidden="true" class="content stats-panel" id="{{rating_name}}">
+          {% endif %}
+          <p>
+          <div class="row">
+            <div class="large-12 columns">
+              <div class="interior-panel">
+                <strong> {% filter upper %}{{rating_name}}{% endfilter %} </strong>
+                <br>
+                <br>
+                {% if rating_val.items() | length > 0 %}
+                {% for question in rating_val %}
+                <p class="formattedParagraph text-left">
+                  <strong> Q: </strong> {{ rating_val[question].question }}
+                  <br>
+                  <strong> A: </strong>{{ rating_val[question].answer }}
+                  <br>
+                  <a href="/review/{{question}}"> See more >> </a>
+                </p>
+                {% endfor %}
+                {% else %}
+                <p class="formattedParagraph text-left">
+                  You have no {{rating_name}} questions.
+                </p>
+                {% endif %}
+              </div>
+            </div>
+           </div>
+          </p>
+        </section>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

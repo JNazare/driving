@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}Learn{% endblock %}
+{% block content %}
+
+<div class="center row">
+    <div class="tabs-content">
+        <section role="tabpanel" aria-hidden="true" class="content active" id="dashboardPanel">
+          <p>
+          <div class="row">
+            <div class="large-12 columns">
+              <div class="interior-panel">
+                <p class="formattedParagraph text-left">
+                  <strong>Q:</strong>  {{ question.question }}
+                </p>
+                <p class="formattedParagraph text-left">
+                  <strong>A:</strong>  {{ question.answer }}
+                </p>
+                <p class="formattedParagraph text-left">
+                  <strong>Explanation:</strong>  {{ question.explanation }}
+                </p>
+              </div>
+            </div>
+           </div>
+          </p>
+        </section>
+    </div>
+</div>
+<input id="question_uri" type="hidden" value="{{question.uri}}">
+<input id="progress" type="hidden" value="{{progress}}">
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

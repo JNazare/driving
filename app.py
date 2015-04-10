@@ -6,7 +6,7 @@ import os
 import json
 from random import shuffle
 
-askiiBaseUrl = "http://localhost:5000/askii/api/v1.0"
+askiiBaseUrl = "http://askii.media.mit.edu/askii/api/v1.0"
 key = "qb4SpwwMbvDut4DK5SGT3GU5eYGQAzAa0FC0Wu56Mo0"
 headers = {"Content-Type": "application/json"}
 
@@ -31,6 +31,8 @@ def progress():
 @app.route('/')
 @login_required
 def index():
+    session["count"]=0
+    session["seen_questions"] = []
     return render_template('index.html', user=session["user"])
 
 @app.route('/login', methods=['GET'])
@@ -74,11 +76,18 @@ def logout():
 
 @app.route('/question/<count>', methods=['GET'])
 def get_question(count):
-    session["count"]=int(count)
-    data = json.dumps({"count": str(count)})
-    # print session["user"]
-    question = requests.post(askiiBaseUrl+"/next/"+session["user"]["_id"]+"?key="+key, headers=headers, data=data)
-    question = question.json()
+    count = int(count)
+    session_count = session.get("count", 0)
+    if count < session_count and count >= 0:
+        print count, session_count
+        question = requests.get(askiiBaseUrl+"/questions/"+session["seen_questions"][session_count]+"?key="+key).json()
+    else:
+        session["count"]=count
+        data = json.dumps({"count": str(count)})
+        question = requests.post(askiiBaseUrl+"/next/"+session["user"]["_id"]+"?key="+key, headers=headers, data=data)
+        question = question.json()
+        session["seen_questions"].append(question["uri"].split("/")[-1])
+    print question
     random_choices = []
     for possibility in question["possiblities"]:
         random_choices.append((possibility, 0))
@@ -97,6 +106,33 @@ def answer_question():
     count_str = str(session["count"]+1)
     next_url = url_for('get_question', count=count_str, _external=True)
     return jsonify({"next_url" : next_url})
+
+@app.route('/stats', methods=['GET'])
+def get_stats():
+    user_id = session["user"]["_id"]
+    user = requests.get(askiiBaseUrl+"/users/"+user_id+"?key="+key, headers=headers)
+    answered_questions = user.json()["user"]["questions"]
+    easy_questions = {}
+    medium_questions = {}
+    hard_questions = {}
+    very_hard_questions = {}
+    for question_key in answered_questions:
+        question_val = answered_questions[question_key]
+        if question_val["difficulty"] <= 1:
+            easy_questions[question_key] = requests.get(askiiBaseUrl+"/questions/"+question_key+"?key="+key, headers=headers).json()["question"]
+        elif question_val["difficulty"] <= 3:
+            medium_questions[question_key] = requests.get(askiiBaseUrl+"/questions/"+question_key+"?key="+key, headers=headers).json()["question"]
+        elif question_val["difficulty"] <= 5:
+            hard_questions[question_key] = requests.get(askiiBaseUrl+"/questions/"+question_key+"?key="+key, headers=headers).json()["question"]
+        elif question_val["difficulty"] <= 7:
+            very_hard_questions[question_key] = requests.get(askiiBaseUrl+"/questions/"+question_key+"?key="+key, headers=headers).json()["question"]
+    all_ratings = [{"easy": easy_questions}, {"medium": medium_questions}, {"hard": hard_questions}, {"very hard": very_hard_questions}]
+    return render_template('stats.html', user=user, ratings=all_ratings)
+
+@app.route('/review/<question_id>', methods=['GET'])
+def review_question(question_id):
+    question = requests.get(askiiBaseUrl+"/questions/"+question_id+"?key="+key, headers=headers).json()
+    return render_template('review.html', user=session["user"], question=question["question"])
 
 
 if __name__ == '__main__':

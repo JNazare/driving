@@ -1,12 +1,20 @@
 <nav class="top-bar" data-topbar role="navigation">
   <section class="top-bar-section">
     <!-- Right Nav Section -->
-    <ul class="right">
-      <li>
-        {% if user %}
-        <a href="/logout">Logout</a>
-        {% endif %}
+    {% if user %}
+    <ul class="title-area left">
+      <li class="name">
+        <h1><a href="/">Study with Askii</a></h1>
       </li>
     </ul>
+    <ul class="right">
+      <li>
+        <a href="/stats">Stats</a>
+      </li>
+      <li>
+        <a href="/logout">Logout</a>
+      </li>
+    </ul>
+    {% endif %}
   </section>
 </nav>
