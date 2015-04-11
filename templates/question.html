@@ -19,6 +19,12 @@
               <div class="interior-panel">
                 <p class="formattedParagraph text-left">
                   {{ question.question }}
+                  {% if question.image %}
+                  <br>
+                  <center>
+                    <img src="{{question.image}}" width="100px">
+                  </center>
+                  {% endif %}
                 </p>
                 <form>
                   {% set counter = 0 %}
